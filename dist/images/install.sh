@@ -46,6 +46,7 @@ SET_VXLAN_TX_OFF=${SET_VXLAN_TX_OFF:-false}
 OVSDB_CON_TIMEOUT=${OVSDB_CON_TIMEOUT:-3}
 OVSDB_INACTIVITY_TIMEOUT=${OVSDB_INACTIVITY_TIMEOUT:-10}
 ENABLE_LIVE_MIGRATION_OPTIMIZE=${ENABLE_LIVE_MIGRATION_OPTIMIZE:-true}
+ENABLE_OVN_LB_PREFER_LOCAL=${ENABLE_OVN_LB_PREFER_LOCAL:-false}
 
 PROBE_HTTP_SCHEME="HTTP"
 if [ "$SECURE_SERVING" = "true" ]; then
@@ -2815,6 +2816,8 @@ spec:
                   type: boolean
                 enableMulticastSnoop:
                   type: boolean
+                enableExternalLBAddress:
+                  type: boolean
                 routeTable:
                   type: string
                 namespaceSelectors:
@@ -3692,6 +3695,13 @@ rules:
       - create
       - patch
       - update
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - list
+      - watch
   - apiGroups:
       - ""
     resources:
@@ -4734,6 +4744,7 @@ spec:
           - --ovsdb-con-timeout=$OVSDB_CON_TIMEOUT
           - --ovsdb-inactivity-timeout=$OVSDB_INACTIVITY_TIMEOUT
           - --enable-live-migration-optimize=$ENABLE_LIVE_MIGRATION_OPTIMIZE
+          - --enable-ovn-lb-prefer-local=$ENABLE_OVN_LB_PREFER_LOCAL
           - --image=$REGISTRY/kube-ovn:$VERSION
           securityContext:
             runAsUser: ${RUN_AS_USER}
