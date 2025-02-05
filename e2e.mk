@@ -82,6 +82,7 @@ e2e-build:
 	ginkgo build $(E2E_BUILD_FLAGS) ./test/e2e/kubevirt
 	ginkgo build $(E2E_BUILD_FLAGS) ./test/e2e/webhook
 	ginkgo build $(E2E_BUILD_FLAGS) ./test/e2e/connectivity
+	ginkgo build $(E2E_BUILD_FLAGS) ./test/e2e/metallb
 
 .PHONY: k8s-conformance-e2e
 k8s-conformance-e2e:
@@ -252,8 +253,8 @@ kube-ovn-connectivity-e2e:
 	ginkgo $(GINKGO_OUTPUT_OPT) --procs 2 --randomize-all -v \
 		--focus=CNI:Kube-OVN ./test/e2e/connectivity -- $(TEST_BIN_ARGS)
 
-.PHONY: kube-ovn-metallb-e2e
-kube-ovn-metallb-e2e:
+.PHONY: kube-ovn-underlay-metallb-e2e
+kube-ovn-underlay-metallb-e2e:
 	ginkgo build $(E2E_BUILD_FLAGS) ./test/e2e/metallb
 	E2E_BRANCH=$(E2E_BRANCH) \
 	E2E_IP_FAMILY=$(E2E_IP_FAMILY) \

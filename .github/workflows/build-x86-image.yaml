@@ -3145,7 +3145,7 @@ jobs:
           path: kube-ovn-connectivity-e2e-${{ matrix.mode }}-ko-log.tar.gz
 
 
-  kube-ovn-metallb-e2e:
+  kube-ovn-underlay-metallb-e2e:
     name: OVN METALLB E2E
     needs:
       - build-kube-ovn
@@ -3222,6 +3222,14 @@ jobs:
       - name: Load images
         run: docker load -i kube-ovn.tar
 
+      - name: Set environment variables
+        run: |
+          if [ $(($RANDOM%2)) -ne 0 ]; then
+            # run as root and use valgrind to debug memory leak
+            echo "VERSION=$(cat VERSION)-debug" >> "$GITHUB_ENV"
+            echo "DEBUG_WRAPPER=valgrind" >> "$GITHUB_ENV"
+          fi
+
       - name: Create kind cluster
         run: |
           pipx install jinjanator
@@ -3232,53 +3240,53 @@ jobs:
         run: make kind-install-metallb-pool-from-underlay
 
       - name: Run Ovn Metallb and Kube-OVN Combine E2E
-        id: kube-ovn-metallb-e2e
+        id: kube-ovn-underlay-metallb-e2e
         working-directory: ${{ env.E2E_DIR }}
         env:
           E2E_BRANCH: ${{ github.base_ref || github.ref_name }}
-        run: make kube-ovn-metallb-e2e
+        run: make kube-ovn-underlay-metallb-e2e
 
       - name: Collect k8s events
         if: failure() && ( steps.ovn-metallb-e2e.conclusion == 'failure')
         run: |
-          kubectl get events -A -o yaml > kube-ovn-metallb-e2e-events.yaml
-          tar zcf kube-ovn-metallb-e2e-events.tar.gz kube-ovn-metallb-e2e-events.yaml
+          kubectl get events -A -o yaml > kube-ovn-underlay-metallb-e2e-events.yaml
+          tar zcf kube-ovn-underlay-metallb-e2e-events.tar.gz kube-ovn-underlay-metallb-e2e-events.yaml
 
       - name: Upload k8s events
         uses: actions/upload-artifact@v4
-        if: failure() && (steps.kube-ovn-metallb-e2e.conclusion == 'failure')
+        if: failure() && (steps.kube-ovn-underlay-metallb-e2e.conclusion == 'failure')
         with:
-          name: kube-ovn-metallb-e2e-events
-          path: kube-ovn-metallb-e2e-events.tar.gz
+          name: kube-ovn-underlay-metallb-e2e-events
+          path: kube-ovn-underlay-metallb-e2e-events.tar.gz
 
       - name: Collect apiserver audit logs
-        if: failure() && (steps.kube-ovn-metallb-e2e.conclusion == 'failure')
+        if: failure() && (steps.kube-ovn-underlay-metallb-e2e.conclusion == 'failure')
         run: |
           docker cp kube-ovn-control-plane:/var/log/kubernetes/kube-apiserver-audit.log .
-          tar zcf kube-ovn-metallb-e2e-audit-log.tar.gz kube-apiserver-audit.log
+          tar zcf kube-ovn-underlay-metallb-e2e-audit-log.tar.gz kube-apiserver-audit.log
 
       - name: Upload apiserver audit logs
         uses: actions/upload-artifact@v4
-        if: failure() && (steps.kube-ovn-metallb-e2e.conclusion == 'failure')
+        if: failure() && (steps.kube-ovn-underlay-metallb-e2e.conclusion == 'failure')
         with:
-          name: kube-ovn-metallb-e2e-audit-log
-          path: kube-ovn-metallb-e2e-audit-log.tar.gz
+          name: kube-ovn-underlay-metallb-e2e-audit-log
+          path: kube-ovn-underlay-metallb-e2e-audit-log.tar.gz
 
       - name: kubectl ko log
-        if: failure() && (steps.kube-ovn-metallb-e2e.conclusion == 'failure')
+        if: failure() && (steps.kube-ovn-underlay-metallb-e2e.conclusion == 'failure')
         run: |
           make kubectl-ko-log
-          mv kubectl-ko-log.tar.gz kube-ovn-metallb-e2e-ko-log.tar.gz
+          mv kubectl-ko-log.tar.gz kube-ovn-underlay-metallb-e2e-ko-log.tar.gz
 
       - name: upload kubectl ko log
         uses: actions/upload-artifact@v4
-        if: failure() && (steps.kube-ovn-metallb-e2e.conclusion == 'failure')
+        if: failure() && (steps.kube-ovn-underlay-metallb-e2e.conclusion == 'failure')
         with:
-          name: kube-ovn-metallb-e2e-ko-log
-          path: kube-ovn-metallb-e2e-ko-log.tar.gz
+          name: kube-ovn-underlay-metallb-e2e-ko-log
+          path: kube-ovn-underlay-metallb-e2e-ko-log.tar.gz
 
       - name: Check kube ovn pod restarts
-        if: ${{ success() || (failure() && (steps.install.conclusion == 'failure' || steps.kube-ovn-metallb-e2e.conclusion == 'failure')) }}
+        if: ${{ success() || (failure() && (steps.install.conclusion == 'failure' || steps.kube-ovn-underlay-metallb-e2e.conclusion == 'failure')) }}
         run: make check-kube-ovn-pod-restarts
 
   push:
@@ -3290,7 +3298,7 @@ jobs:
       - kube-ovn-conformance-e2e
       - kube-ovn-ic-conformance-e2e
       - kube-ovn-ipsec-e2e
-      - kube-ovn-metallb-e2e
+      - kube-ovn-underlay-metallb-e2e
       - multus-conformance-e2e
       - vpc-egress-gateway-e2e
       - ovn-vpc-nat-gw-conformance-e2e

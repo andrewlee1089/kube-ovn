@@ -3675,6 +3675,7 @@ rules:
       - nodes
       - nodes/status
       - pods
+      - services
     verbs:
       - get
       - list
@@ -3695,13 +3696,6 @@ rules:
       - create
       - patch
       - update
-  - apiGroups:
-      - ""
-    resources:
-      - services
-    verbs:
-      - list
-      - watch
   - apiGroups:
       - ""
     resources:

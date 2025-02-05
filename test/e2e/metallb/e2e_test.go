@@ -326,13 +326,13 @@ var _ = framework.Describe("[group:metallb]", func() {
 		_ = subnetClient.CreateSync(subnet)
 
 		ginkgo.By("Create deploy in underlay subnet")
-		annoations := map[string]string{
+		annotations := map[string]string{
 			util.LogicalSwitchAnnotation: subnetName,
 		}
 		podLabels := map[string]string{"app": "nginx"}
 
 		args := []string{"netexec", "--http-port", strconv.Itoa(curlListenPort)}
-		deploy := framework.MakeDeployment(deployName, 3, podLabels, annoations, "nginx", framework.AgnhostImage, "")
+		deploy := framework.MakeDeployment(deployName, 3, podLabels, annotations, "nginx", framework.AgnhostImage, "")
 		deploy.Spec.Template.Spec.Containers[0].Args = args
 		_ = deployClient.CreateSync(deploy)
 
@@ -408,7 +408,7 @@ func checkReachable(f *framework.Framework, containerID, sourceIP, targetIP, tar
 		}
 	}
 
-	framework.ExpectNotEqual(vipNode, "", "Failed to find the node with MAC address: %s", vipMac)
+	framework.ExpectNotEmpty(vipNode, "Failed to find the node with MAC address: %s", vipMac)
 	framework.Logf("Node with MAC address %s is %s", vipMac, vipNode)
 
 	ginkgo.By("Checking the backend pod's host is same as the metallb vip's node")
