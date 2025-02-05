@@ -339,6 +339,7 @@ func (c *Controller) handleUpdateService(svcObject *updateSvcObject) error {
 	}
 
 	if err := c.checkServiceLBIPBelongToSubnet(svc); err != nil {
+		klog.Error(err)
 		return err
 	}
 
