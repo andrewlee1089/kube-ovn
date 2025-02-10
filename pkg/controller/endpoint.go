@@ -382,7 +382,7 @@ func getIPPortMappingBackend(endpoints *v1.Endpoints, pods []*v1.Pod, servicePor
 
 		for _, address := range subset.Addresses {
 			if isGenIPPortMapping && address.TargetRef.Name != "" {
-				ipName := fmt.Sprintf("%s.%s", address.TargetRef.Name, endpoints.Namespace)
+				ipName := fmt.Sprintf("%s.%s", address.TargetRef.Name, address.TargetRef.Namespace)
 				ipPortMapping[address.IP] = fmt.Sprintf(util.HealthCheckNamedVipTemplate, ipName, checkVip)
 			}
 			if address.TargetRef == nil || address.TargetRef.Kind != "Pod" {
