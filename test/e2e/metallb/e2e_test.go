@@ -315,7 +315,9 @@ var _ = framework.Describe("[group:metallb]", func() {
 			ObjectMeta: metav1.ObjectMeta{
 				Name: metallbIPPoolName,
 			},
-			Spec: metallbv1beta1.L2AdvertisementSpec{},
+			Spec: metallbv1beta1.L2AdvertisementSpec{
+				IPAddressPools: []string{metallbIPPoolName},
+			},
 		}
 		_, err = f.MetallbClientSet.CreateL2Advertisement(l2Advertisement)
 		framework.ExpectNoError(err)
