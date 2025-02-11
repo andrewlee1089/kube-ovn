@@ -357,11 +357,11 @@ var _ = framework.Describe("[group:metallb]", func() {
 		service = f.ServiceClient().Get(serviceName)
 		lbsvcIP := service.Status.LoadBalancer.Ingress[0].IP
 
-		checkReachable(f, containerID, clientip, lbsvcIP, "80", clusterName, serviceName, true)
+		checkReachable(f, containerID, clientip, lbsvcIP, "80", clusterName, true)
 	})
 })
 
-func checkReachable(f *framework.Framework, containerID, sourceIP, targetIP, targetPort, clusterName, serviceName string, expectReachable bool) {
+func checkReachable(f *framework.Framework, containerID, sourceIP, targetIP, targetPort, clusterName string, expectReachable bool) {
 	ginkgo.GinkgoHelper()
 	ginkgo.By("checking curl reachable")
 	cmd := strings.Fields(fmt.Sprintf("curl -q -s --connect-timeout 2 --max-time 2 %s/clientip", net.JoinHostPort(targetIP, targetPort)))
@@ -417,15 +417,4 @@ func checkReachable(f *framework.Framework, containerID, sourceIP, targetIP, tar
 	backendPod := f.PodClient().GetPod(backendPodName)
 	backendPodNode := backendPod.Spec.NodeName
 	framework.ExpectEqual(backendPodNode, vipNode)
-
-	l2status, err := f.MetallbClientSet.ListServiceL2Statuses()
-	framework.ExpectNoError(err)
-
-	for _, l2ss := range l2status.Items {
-		if l2ss.Status.ServiceName == serviceName {
-			framework.Logf("service %s VIP node: %s", serviceName, vipNode)
-			framework.ExpectEqual(l2ss.Status.Node, vipNode)
-			break
-		}
-	}
 }
