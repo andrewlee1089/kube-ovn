@@ -262,6 +262,11 @@ func (c *Controller) handleAddOrUpdateVpc(key string) error {
 		return err
 	}
 
+	if !cachedVpc.DeletionTimestamp.IsZero() {
+		c.enqueueDelVpc.Add(key)
+		return
+	}
+
 	vpc, err := c.formatVpc(cachedVpc.DeepCopy())
 	if err != nil {
 		klog.Errorf("failed to format vpc %s: %v", key, err)
