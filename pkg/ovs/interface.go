@@ -116,6 +116,7 @@ type LogicalSwitchPort interface {
 	SetLogicalSwitchPortMigrateOptions(lspName, srcNodeName, targetNodeName string) error
 	ResetLogicalSwitchPortMigrateOptions(lspName, srcNodeName, targetNodeName string, migratedFail bool) error
 	CleanLogicalSwitchPortMigrateOptions(lspName string) error
+	CreateLogicalSwitchPortOp(lsp *ovnnb.LogicalSwitchPort, lsName string) ([]ovsdb.Operation, error)
 }
 
 type LoadBalancer interface {
